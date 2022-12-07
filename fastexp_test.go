@@ -39,6 +39,27 @@ func BenchmarkFastExp(b *testing.B) {
 	result32 = x
 }
 
+//go:noinline
+func FastExpNoInline(x float32) float32 {
+	return FastExp(x)
+}
+
+func BenchmarkFastExpNoInline(b *testing.B) {
+	// result: without inlining, it's ~50% slower than with inlining, across many architectures.
+	input := make([]float32, b.N)
+	for i := range input {
+		input[i] = float32(i%40 - 20)
+	}
+
+	b.ResetTimer()
+
+	var x float32
+	for n := 0; n < b.N; n++ {
+		x += FastExpNoInline(input[n])
+	}
+	result32 = x
+}
+
 var result64 float64
 
 func BenchmarkExpStd64(b *testing.B) {
